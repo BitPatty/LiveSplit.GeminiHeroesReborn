@@ -1,4 +1,4 @@
-// Gemini.asl Version 1.0
+// Gemini.asl Version 1.1
 //
 // A load remover and autosplitter for Gemini: Heroes Reborn
 // See https://www.speedrun.com/ghr
