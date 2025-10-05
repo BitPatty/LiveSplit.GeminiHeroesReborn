@@ -1,4 +1,4 @@
-// Gemini.asl Version 1.1
+// Gemini.asl Version 1.2
 //
 // A load remover and autosplitter for Gemini: Heroes Reborn
 // See https://www.speedrun.com/ghr
@@ -14,6 +14,10 @@
 //
 // Original author's note:
 //   Special thanks to Toxic_TT (twitch.tv/toxic_tt) for mentoring and helping me out with everything.
+//
+// Changelog:
+//   - v1.1 - Minor code cleanup
+//   - v1.2 - Add double split prevention
 
 state("TravelerGame-Win64-Shipping")
 {
@@ -32,8 +36,10 @@ state("TravelerGame-Win64-Shipping")
 
 init
 {
-    // Initialize variable to track amount load prompts after last load screen
+    // Variable to track amount load prompts after last load screen
     vars.prompts_after_load = 0;
+    // Variable containing a decrementing counter to prevent double splits
+    vars.autosplit_cooldown = 0;
 }
 
 split
@@ -44,11 +50,17 @@ split
         vars.prompts_after_load = current.load_prompts;
     }
 
+    // If still in autosplit cooldown, don't try to autosplit
+    if(vars.autosplit_cooldown > 0) {
+        vars.autosplit_cooldown -= 1;
+        return false;
+    }
+
     // Splits if loading screen starts and no additional manual loads have been triggered
     // Prevents splits from manual checkpoint resets and level loads from main menu
     // (splits on death reload though, and will skip split if manual reset was pressed but canceled out of)
-    if(current.scene_state == 3 && old.scene_state != 3 && current.load_prompts == vars.prompts_after_load)
-    {
+    if(current.scene_state == 3 && old.scene_state != 3 && current.load_prompts == vars.prompts_after_load) {
+        vars.autosplit_cooldown = 30;
         return true;
     }
 }
